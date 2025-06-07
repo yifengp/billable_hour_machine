@@ -9,6 +9,20 @@
 #include <Bounce2.h>
 #include <Adafruit_Thermal.h>
 
+// suprising
+#include <avr/pgmspace.h>          // 放到 flash，省 SRAM
+
+const char PROGMEM surprise0[] = "Wife always wins.";
+const char PROGMEM surprise1[] = "Coffee is billed separately ☕";
+const char PROGMEM surprise2[] = "Time is money—literally!";
+const char PROGMEM surprise3[] = "Your wife is missing you.";
+const char PROGMEM surprise4[] = "Case closed. Have a nice day.";
+
+const char* const SURPRISE_TABLE[] PROGMEM = {
+  surprise0, surprise1, surprise2, surprise3, surprise4
+};
+const uint8_t SURPRISE_COUNT = sizeof(SURPRISE_TABLE)/sizeof(SURPRISE_TABLE[0]);
+
 
 // ====  LCD  ====
 #ifdef LCD_I2C
@@ -66,6 +80,8 @@ void setup() {
   pinMode(BTN_PIN, INPUT);         // outside 1 k resistor → LOW as idle
   debouncer.attach(BTN_PIN);
   debouncer.interval(25);          // 25 ms removing shaking
+
+   randomSeed(analogRead(A15));     // 任意悬空 A 引脚即可
 
   // ---- LCD ----
 #ifdef LCD_I2C
@@ -141,6 +157,24 @@ void updateLCD() {
   lcd.setCursor(0,0); lcd.print(line1); lcd.print("   ");   
   lcd.setCursor(0,1); lcd.print(line2); lcd.print("   ");
 }
+// suprising function
+void maybePrintSurprise(uint8_t pctChance = 30) {   // 默认 30% 概率
+  if (random(100) < pctChance) {                    // 0–99
+    printer.feed(1);
+    printer.inverseOn();                            // 反白标题
+    printer.println(F(">>> SURPRISE <<<"));
+    printer.inverseOff();
+
+    // --- 从 Flash 取一句 ---
+    char buf[64];                                   // 临时缓冲
+    uint8_t idx = random(SURPRISE_COUNT);
+    strcpy_P(buf, (PGM_P)pgm_read_ptr(&SURPRISE_TABLE[idx]));
+    printer.boldOn();
+    printer.println(buf);
+    printer.boldOff();
+    printer.feed(1);
+  }
+}
 
 /* -----------  printer  ----------- */
 void printSlip(const DateTime& s, const DateTime& e, uint32_t units) {
@@ -162,12 +196,21 @@ void printSlip(const DateTime& s, const DateTime& e, uint32_t units) {
   printer.print(e.hour());  printer.print(':');
   printer.println(e.minute());
 
+  printer.boldOn();
   printer.print(F("Units : "));
   printer.println(units);
   printer.println(F("Project:"));
   printer.println(F("Notes  :"));
   printer.println(F(""));
-  printer.println(F("====[ Yuqiao.H. Fields Howell LLP ]===="));
-  printer.println(F("[Happy Wife Happy Life! <3]"));
+  printer.println(F(">> 【Lawyer Name】."));
+  printer.println(F(">> Yvonne Peng LLP"));
+
+  printer.boldOff();               
+  printer.write(0x1B); printer.write(0x34);   // Italic ON
+  printer.println(F("Happy Wife Happy Life"));
+  printer.write(0x1B); printer.write(0x35);   // Italic OFF
+  printer.println(F("==========================="));
+
   printer.feed(3);
+  maybePrintSurprise(); 
 }

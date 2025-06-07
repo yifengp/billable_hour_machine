@@ -39,15 +39,27 @@ const char *DOW_SHORT[7] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
 RTC_DS3231 rtc;
 
 /* ========  Auto-Calibrate helpers  ======== */
+/* first time
 bool rtcNeedsCalib() {
   if (rtc.lostPower()) return true;          
   DateTime nowRTC  = rtc.now();
   DateTime buildTS = DateTime(F(__DATE__), F(__TIME__));
-  return (buildTS.unixtime() - nowRTC.unixtime()) > 120;  // if the difference ≥2 min
+  return (buildTS.unixtime() - nowRTC.unixtime()) > 3;  // if the difference ≥2 min
 }
 
 void calibrateRTC() {
   rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));         // adjust the local time if needed
+}*/
+
+// after the first time!!
+bool rtcNeedsCalib() {
+  
+  return rtc.lostPower();   // 只看 OSF，一旦校完就保持 false
+}
+
+void calibrateRTC() {
+  // adjust() automatically update OSF, no need to manually clear
+  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 }
 
 
@@ -81,7 +93,7 @@ void setup() {
   debouncer.attach(BTN_PIN);
   debouncer.interval(25);          // 25 ms removing shaking
 
-   randomSeed(analogRead(A15));     // 任意悬空 A 引脚即可
+   randomSeed(analogRead(A15));     // any A 
 
   // ---- LCD ----
 #ifdef LCD_I2C
@@ -103,7 +115,7 @@ void loop() {
   delay(200);
 }
 
-/* -----------  处理按键  ----------- */
+/* -----------  button  ----------- */
 void handleButtonPress() {
   if (state == IDLE) {                           // ⇒ Startcounting! @YvonnePeng
     startTime = rtc.now();
@@ -158,15 +170,15 @@ void updateLCD() {
   lcd.setCursor(0,1); lcd.print(line2); lcd.print("   ");
 }
 // suprising function
-void maybePrintSurprise(uint8_t pctChance = 30) {   // 默认 30% 概率
+void maybePrintSurprise(uint8_t pctChance = 30) {   // percentage 30% 
   if (random(100) < pctChance) {                    // 0–99
     printer.feed(1);
-    printer.inverseOn();                            // 反白标题
+    printer.inverseOn();                            // reverse title
     printer.println(F(">>> SURPRISE <<<"));
     printer.inverseOff();
 
-    // --- 从 Flash 取一句 ---
-    char buf[64];                                   // 临时缓冲
+    // ---get one sentence from Flash  ---
+    char buf[64];                                   // temp buff
     uint8_t idx = random(SURPRISE_COUNT);
     strcpy_P(buf, (PGM_P)pgm_read_ptr(&SURPRISE_TABLE[idx]));
     printer.boldOn();
@@ -202,8 +214,8 @@ void printSlip(const DateTime& s, const DateTime& e, uint32_t units) {
   printer.println(F("Project:"));
   printer.println(F("Notes  :"));
   printer.println(F(""));
-  printer.println(F(">> 【Lawyer Name】."));
-  printer.println(F(">> Yvonne Peng LLP"));
+  printer.println(F(">> Yuqiao.H."));
+  printer.println(F(">> Fields Howell LLP"));
 
   printer.boldOff();               
   printer.write(0x1B); printer.write(0x34);   // Italic ON

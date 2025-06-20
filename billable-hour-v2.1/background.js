@@ -1,9 +1,9 @@
 chrome.action.onClicked.addListener(() => {
   chrome.windows.create({
-    url: chrome.runtime.getURL("window-small.html"),
+    url: chrome.runtime.getURL("window-full.html"),
     type: "popup",
-    width: 295,
-    height: 295,
+    width: 420,
+    height: 600,
     focused: true
   });
 });

@@ -128,14 +128,33 @@
   function formatDate(t) {
     return `${t.getFullYear()}-${(t.getMonth()+1).toString().padStart(2,'0')}-${t.getDate().toString().padStart(2,'0')}`;
   }
-  
-  confirmSaveButton.addEventListener('click', () => {
+
+// ...existing code...
+confirmSaveButton.addEventListener('click', () => {
     const endTime = new Date();
     const clientText = clientInput.value.trim();
     const notesText = notesInput.value.trim();
     
     const record = saveSession(startTime, endTime, unitCount, clientText, notesText);
     updateLastSession(record);
+
+    // --- Add this block to save as txt file ---
+    const txtContent = [
+      `Start: ${formatTime(startTime)}`,
+      `End: ${formatTime(endTime)}`,
+      `Units: ${unitCount}`,
+      `Client / Project ID: ${clientText}`,
+      `Notes: ${notesText}`
+    ].join('\n');
+    // ...existing code...
+    const blob = new Blob([txtContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    chrome.downloads.download({
+      url: url,
+      filename: `${formatDate(startTime)}-billable-hour.txt`,
+      conflictAction: 'overwrite'
+    });
+    // --- End block ---
 
     // Reset modal and hide
     clientInput.value = '';
@@ -145,6 +164,7 @@
     document.getElementById('unitDisplay').style.display = 'none';
     showOverlay('End');
 });
+// ...existing code...
 
 
 })();

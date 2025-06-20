@@ -63,10 +63,26 @@
     document.getElementById('dateLine').innerText = `${day} ${dateStr}`;
     document.getElementById('currentTime').innerText = `${timeStr}`;
   }
-
+// ...existing code...
+  function recordToTable(record) {
+    const lines = record.replace(/={2,}/g, '').trim().split('\n');
+    let html = '<table class="session-table"><tbody>';
+    lines.forEach(line => {
+      const [key, ...rest] = line.split(':');
+      if (rest.length > 0) {
+      let keyClass = "session-key";
+      if (key.trim() === "Start") keyClass += " start-key";
+      if (key.trim() === "End") keyClass += " end-key";
+      html += `<tr><td class="${keyClass}">${key.trim()}</td><td class="session-value">${rest.join(':').trim()}</td></tr>`;
+    }
+  });
+    html += '</tbody></table>';
+    return html;
+  }
+// ...existing code...
   function updateLastSession(record) {
     const lastBox = document.getElementById('lastSessionInfo');
-    lastBox.innerText = record;
+    lastBox.innerHTML = recordToTable(record);
   }
 
   function saveSession(start, end, units, clientText, notesText) {
@@ -92,7 +108,7 @@
         sessionHistory = result.floating_counter_history.split('=====\n').filter(s => s.trim().length > 0).map(s => s + '=====\n');
         if (sessionHistory.length > 0) {
           const lastRecord = sessionHistory[sessionHistory.length - 1];
-          document.getElementById('lastSessionInfo').innerText = lastRecord;
+          document.getElementById('lastSessionInfo').innerHTML = recordToTable(lastRecord);
         }
       }
     });
@@ -103,7 +119,8 @@
     if (historyArea.style.display === 'none') {
       chrome.storage.local.get(['floating_counter_history'], (result) => {
         const history = result.floating_counter_history || '没有记录';
-        document.getElementById('historyDisplay').textContent = history;
+        const records = history.split('=====').filter(s => s.trim().length > 0);
+        document.getElementById('historyDisplay').innerHTML = records.map(recordToTable).join('<hr/>');
       });
       historyArea.style.display = 'block';
       document.getElementById('viewHistoryButton').innerText = '📜 收起所有历史记录';
@@ -138,23 +155,18 @@ confirmSaveButton.addEventListener('click', () => {
     const record = saveSession(startTime, endTime, unitCount, clientText, notesText);
     updateLastSession(record);
 
-    // --- Add this block to save as txt file ---
-    const txtContent = [
-      `Start: ${formatTime(startTime)}`,
-      `End: ${formatTime(endTime)}`,
-      `Units: ${unitCount}`,
-      `Client / Project ID: ${clientText}`,
-      `Notes: ${notesText}`
-    ].join('\n');
-    // ...existing code...
-    const blob = new Blob([txtContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    chrome.downloads.download({
-      url: url,
-      filename: `${formatDate(startTime)}-billable-hour.txt`,
-      conflictAction: 'overwrite'
+    // --- 修改这里：拼接所有历史记录 ---
+    chrome.storage.local.get(['floating_counter_history'], (result) => {
+        const allHistory = sessionHistory.join('');
+        const blob = new Blob([allHistory], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        chrome.downloads.download({
+            url: url,
+            filename: `${formatDate(startTime)}-billable-hour.txt`,
+            conflictAction: 'overwrite'
+        });
     });
-    // --- End block ---
+    // --- 结束修改 ---
 
     // Reset modal and hide
     clientInput.value = '';
@@ -163,6 +175,12 @@ confirmSaveButton.addEventListener('click', () => {
 
     document.getElementById('unitDisplay').style.display = 'none';
     showOverlay('End');
+        // ...existing code...
+    document.getElementById('unitDisplay').style.display = 'none';
+    showOverlay('End');
+    document.getElementById('unitDisplay').innerText = 'Idle'; // 新增：恢复Idle状态
+    document.getElementById('unitDisplay').style.display = 'block'; // 显示Idle
+    // ...existing code...
 });
 // ...existing code...
 

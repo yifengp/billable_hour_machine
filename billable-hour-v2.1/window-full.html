@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Billable Hour Machine</title>
+  <link rel="stylesheet" href="window-full.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div id="title" class="pixel-font">Billable Hour Machine!</div>
+
+  <div id="comment" class="pixel-font-small">click the dollar button to start counting!</div>
+
+  <div id="dateLine" class="pixel-font">--</div>
+
+  <div id="currentTime" class="pixel-font">--</div>
+
+  <div id="unitDisplay" class="pixel-font">Running: 1 Units</div>
+
+  <button id="startStopButton">
+    <div id="overlay"></div>
+  </button>
+
+  <div id="lastSessionTitle" class="pixel-font-small">Last Session</div>
+  <div id="lastSessionInfo" class="sessionBox pixel-font-small"></div>
+
+  <button id="viewHistoryButton">📜 展示所有历史记录</button>
+
+  <div id="historyArea" style="display:none;">
+    <div id="historyDisplay" class="scrollableArea pixel-font-small"></div>
+  </div>
+
+  <button id="clearHistoryButton">🗑️ 清空记录</button>
+
+  <!-- Modal for Client/Notes -->
+  <div id="inputModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <label>Client / Project ID:</label><br/>
+        <input type="text" id="clientInput" /><br/><br/>
+        <label>Notes:</label><br/>
+        <input type="text" id="notesInput" /><br/><br/>
+        <button id="confirmSaveButton">Confirm & Save</button>
+    </div>
+  </div>
+
+
+  <script src="window-full.js"></script>
+
+</body>
+</html>

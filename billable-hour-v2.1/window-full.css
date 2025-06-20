@@ -1,0 +1,178 @@
+html, body {
+  width: 420px;
+  height: 600px;
+  margin: 0;
+  padding: 0;
+  background-color: #E2E2D7;
+  color: #000;
+  font-family: 'Press Start 2P', Arial, sans-serif;
+  text-align: center;
+}
+
+.pixel-font {
+  font-family: 'Press Start 2P', Arial, sans-serif;
+}
+
+.pixel-font-small {
+  font-family: 'Press Start 2P', Arial, sans-serif;
+  font-size: 10px;
+}
+
+#title {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+#comment {
+  margin-top: 8px;
+  font-size: 10px;
+}
+
+#dateLine {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+#currentTime {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+#unitDisplay {
+  margin-top: 12px;
+  font-size: 14px;
+  padding: 8px;
+  background-color: #fffacd;
+  border-radius: 8px;
+  color: #000;
+}
+
+#startStopButton {
+  margin-top: 14px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  border-radius: 12px;
+  width: 160px;
+  height: 160px;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+  position: relative;
+}
+
+#startStopButton:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+#overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #4CAF50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#lastSessionTitle {
+  margin-top: 14px;
+}
+
+#lastSessionInfo {
+  margin-top: 6px;
+  font-size: 10px;
+  color: #000;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+#historyDisplay {
+  margin-top: 10px;
+  font-size: 10px;
+  color: #000000;
+  max-height: 160px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.scrollableArea {
+  overflow-y: auto;
+  max-height: 160px;
+}
+
+#viewHistoryButton {
+  margin-top: 10px;
+  background-color: #ffffff;
+  border: 2px solid #ffffff;
+  padding: 6px 10px;
+  width: 90%;
+  border-radius: 8px;
+  font-size: 10px;
+  cursor: pointer;
+  color: #000;
+}
+
+#viewHistoryButton:hover {
+  background-color: #e6ffe6;
+}
+
+#clearHistoryButton {
+  margin-top: 16px;
+  background-color: #ffdddd;
+  border: 2px solid #ffdddd;
+  padding: 6px 10px;
+  width: 90%;
+  border-radius: 8px;
+  font-size: 10px;
+  cursor: pointer;
+  color: #000;
+}
+
+#clearHistoryButton:hover {
+  background-color: #ffcccc;
+}
+
+.modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  width: 300px;
+  color: #000;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+.modal-content input {
+  width: 90%;
+  padding: 6px;
+  margin-top: 4px;
+}

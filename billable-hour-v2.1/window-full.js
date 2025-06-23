@@ -1,3 +1,10 @@
+// extra function: order of the session
+// extra function: show date of the time
+// extra change the icon of running period
+// extra function: enlarge the start and end button
+// extra function： focus on the icon and instead of the head of the page 
+// adjust the time unit to 6 minutes
+
 (function() {
   const iconURL = chrome.runtime.getURL('icon.png');
   const modal = document.getElementById('inputModal');
@@ -12,8 +19,22 @@
   let startTime = null;
   let unitCount = 1;
   let sessionHistory = [];
+  let sessionIndex = 1; // 新增：记录序号
 
   startClock();
+
+  // 新增：初始化序号
+  function initSessionIndex() {
+    chrome.storage.local.get(['floating_counter_history'], (result) => {
+      if (result.floating_counter_history) {
+        const records = result.floating_counter_history.split('=====\n').filter(s => s.trim().length > 0);
+        sessionIndex = records.length + 1;
+      } else {
+        sessionIndex = 1;
+      }
+    });
+  }
+  initSessionIndex();
 
   startStopButton.addEventListener('click', () => {
     if (!timer) {
@@ -63,7 +84,7 @@
     document.getElementById('dateLine').innerText = `${day} ${dateStr}`;
     document.getElementById('currentTime').innerText = `${timeStr}`;
   }
-// ...existing code...
+
   function recordToTable(record) {
     const lines = record.replace(/={2,}/g, '').trim().split('\n');
     let html = '<table class="session-table"><tbody>';
@@ -79,7 +100,7 @@
     html += '</tbody></table>';
     return html;
   }
-// ...existing code...
+
   function updateLastSession(record) {
     const lastBox = document.getElementById('lastSessionInfo');
     lastBox.innerHTML = recordToTable(record);
@@ -89,13 +110,15 @@
     const startStr = formatTime(start);
     const endStr = formatTime(end);
     const todayDate = formatDate(start);
-    const record = `Start: ${startStr}\nEnd: ${endStr}\nUnits: ${units}\nClient / Project ID: ${clientText}\nNotes: ${notesText}\n=====\n`;
+    // 新增：加上序号
+    const record = `No. ${sessionIndex}\nStart: ${startStr}\nEnd: ${endStr}\nUnits: ${units}\nClient / Project ID: ${clientText}\nNotes: ${notesText}\n=====\n`;
 
     chrome.storage.local.get(['floating_counter_history'], (result) => {
       let history = result.floating_counter_history || '';
       history += record;
       sessionHistory.push(record);
       chrome.storage.local.set({ floating_counter_history: history });
+      sessionIndex++; // 新增：每次保存后序号+1
     });
 
     return record;
@@ -118,15 +141,15 @@
     const historyArea = document.getElementById('historyArea');
     if (historyArea.style.display === 'none') {
       chrome.storage.local.get(['floating_counter_history'], (result) => {
-        const history = result.floating_counter_history || '没有记录';
+        const history = result.floating_counter_history || 'No Worklog History';
         const records = history.split('=====').filter(s => s.trim().length > 0);
         document.getElementById('historyDisplay').innerHTML = records.map(recordToTable).join('<hr/>');
       });
       historyArea.style.display = 'block';
-      document.getElementById('viewHistoryButton').innerText = '📜 收起所有历史记录';
+      document.getElementById('viewHistoryButton').innerText = '📜 Close All History';
     } else {
       historyArea.style.display = 'none';
-      document.getElementById('viewHistoryButton').innerText = '📜 展示所有历史记录';
+      document.getElementById('viewHistoryButton').innerText = '📜 Shou All History';
     }
   });
 
@@ -135,6 +158,7 @@
     chrome.storage.local.remove(['floating_counter_history'], () => {
       document.getElementById('historyDisplay').textContent = '';
       document.getElementById('lastSessionInfo').textContent = '';
+      sessionIndex = 1; // 新增：清空时重置序号
     });
   });
 
@@ -146,8 +170,7 @@
     return `${t.getFullYear()}-${(t.getMonth()+1).toString().padStart(2,'0')}-${t.getDate().toString().padStart(2,'0')}`;
   }
 
-// ...existing code...
-confirmSaveButton.addEventListener('click', () => {
+  confirmSaveButton.addEventListener('click', () => {
     const endTime = new Date();
     const clientText = clientInput.value.trim();
     const notesText = notesInput.value.trim();
@@ -173,9 +196,6 @@ confirmSaveButton.addEventListener('click', () => {
     notesInput.value = '';
     modal.style.display = 'none';
 
-    document.getElementById('unitDisplay').style.display = 'none';
-    showOverlay('End');
-        // ...existing code...
     document.getElementById('unitDisplay').style.display = 'none';
     showOverlay('End');
     document.getElementById('unitDisplay').innerText = 'Idle'; // 新增：恢复Idle状态

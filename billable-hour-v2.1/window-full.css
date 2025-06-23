@@ -225,3 +225,6 @@ html, body {
   color: #222;
 }
 
+.current-session-table {
+  background: #fffacd !important;
+}

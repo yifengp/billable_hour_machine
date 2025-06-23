@@ -6,7 +6,8 @@
 // adjust the time unit to 6 minutes
 
 (function() {
-  const iconURL = chrome.runtime.getURL('icon.png');
+  const iconURL = chrome.runtime.getURL('icon1.png'); // 待机图片
+  const iconCountingURL = chrome.runtime.getURL('icon2.png'); // 计时图片
   const modal = document.getElementById('inputModal');
   const clientInput = document.getElementById('clientInput');
   const notesInput = document.getElementById('notesInput');
@@ -44,12 +45,15 @@
       unitCount = 1;
       document.getElementById('unitDisplay').innerText = `Running: ${unitCount} Units`;
       document.getElementById('unitDisplay').style.display = 'block';
+      showCurrentSessionTable(startTime, unitCount); // 新增
+      document.getElementById('lastSessionTitle').innerText = 'Current Session'; // 新增
+      startStopButton.style.backgroundImage = `url('${iconCountingURL}')`; // 计时图片
     } else {
       clearInterval(timer);
       timer = null;
-
       // Show modal first instead of saving immediately:
       modal.style.display = 'flex';
+      startStopButton.style.backgroundImage = `url('${iconURL}')`; // 恢复待机图片
     }
   });
 
@@ -58,6 +62,9 @@
     const elapsedMinutes = Math.floor(elapsedMs / 60000);
     unitCount = Math.max(1, Math.floor(elapsedMinutes / 6) + 1);
     document.getElementById('unitDisplay').innerText = `Running: ${unitCount} Units`;
+    if (timer) {
+    showCurrentSessionTable(startTime, unitCount);
+    }
   }
 
   function showOverlay(text) {
@@ -200,10 +207,22 @@
     showOverlay('End');
     document.getElementById('unitDisplay').innerText = 'Idle'; // 新增：恢复Idle状态
     document.getElementById('unitDisplay').style.display = 'block'; // 显示Idle
-    // ...existing code...
+    document.getElementById('lastSessionTitle').innerText = 'Last Session'; // 新增
+    startStopButton.style.backgroundImage = `url('${iconURL}')`; // 恢复待机图片
 });
-// ...existing code...
 
+function showCurrentSessionTable(start, units) {
+  const startStr = formatTime(start);
+  const html = `
+    <table class="session-table current-session-table"><tbody>
+      <tr><td class="session-key start-key">Start</td><td class="session-value">${startStr}</td></tr>
+      <tr><td class="session-key end-key">End</td><td class="session-value"></td></tr>
+      <tr><td class="session-key">Units</td><td class="session-value">${units}</td></tr>
+    </tbody></table>
+  `;
+  document.getElementById('lastSessionInfo').innerHTML = html;
+  document.getElementById('lastSessionTitle').innerText = 'Current Session';
+}
 
 })();
 

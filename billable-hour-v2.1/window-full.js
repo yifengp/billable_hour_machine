@@ -41,7 +41,7 @@
     if (!timer) {
       startTime = new Date();
       timer = setInterval(updateUnits, 60000);
-      showOverlay('Start!');
+      showOverlay('Start!', { fontSize: '32px', fontWeight: '900' }); // 高亮大字
       unitCount = 1;
       document.getElementById('unitDisplay').innerText = `Running: ${unitCount} Units`;
       document.getElementById('unitDisplay').style.display = 'block';
@@ -54,6 +54,7 @@
       // Show modal first instead of saving immediately:
       modal.style.display = 'flex';
       startStopButton.style.backgroundImage = `url('${iconURL}')`; // 恢复待机图片
+      showOverlay('End', { fontSize: '32px', fontWeight: '900' }); // 高亮大字
     }
   });
 
@@ -67,12 +68,26 @@
     }
   }
 
-  function showOverlay(text) {
+  function showOverlay(text, options = {}) {
     const overlay = document.getElementById('overlay');
     overlay.innerText = text;
+    // 新增：可选自定义字体大小和加粗
+    if (options.fontSize) {
+      overlay.style.fontSize = options.fontSize;
+    } else {
+      overlay.style.fontSize = '18px'; // 默认
+    }
+    if (options.fontWeight) {
+      overlay.style.fontWeight = options.fontWeight;
+    } else {
+      overlay.style.fontWeight = 'bold';
+    }
     overlay.style.opacity = '1';
     setTimeout(() => {
       overlay.style.opacity = '0';
+      // 恢复默认
+      overlay.style.fontSize = '18px';
+      overlay.style.fontWeight = 'bold';
     }, 800);
   }
 
@@ -113,9 +128,19 @@
     lastBox.innerHTML = recordToTable(record);
   }
 
+  function formatTimeWithDate(t) {
+    // concise: yyyy-MM-dd HH:mm:ss
+    return `${t.getFullYear()}-${(t.getMonth()+1).toString().padStart(2,'0')}-${t.getDate().toString().padStart(2,'0')} ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}:${t.getSeconds().toString().padStart(2,'0')}`;
+  }
+
+  function formatTimeWithMonthDay(t) {
+    // 紧凑格式 MM-dd HH:mm:ss
+    return `${(t.getMonth()+1).toString().padStart(2,'0')}-${t.getDate().toString().padStart(2,'0')} ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}:${t.getSeconds().toString().padStart(2,'0')}`;
+  }
+
   function saveSession(start, end, units, clientText, notesText) {
-    const startStr = formatTime(start);
-    const endStr = formatTime(end);
+    const startStr = formatTimeWithMonthDay(start); // 仅月日
+    const endStr = formatTimeWithMonthDay(end); // 仅月日
     const todayDate = formatDate(start);
     // 新增：加上序号
     const record = `No. ${sessionIndex}\nStart: ${startStr}\nEnd: ${endStr}\nUnits: ${units}\nClient / Project ID: ${clientText}\nNotes: ${notesText}\n=====\n`;
@@ -169,10 +194,6 @@
     });
   });
 
-  function formatTime(t) {
-    return `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}:${t.getSeconds().toString().padStart(2,'0')}`;
-  }
-
   function formatDate(t) {
     return `${t.getFullYear()}-${(t.getMonth()+1).toString().padStart(2,'0')}-${t.getDate().toString().padStart(2,'0')}`;
   }
@@ -204,7 +225,7 @@
     modal.style.display = 'none';
 
     document.getElementById('unitDisplay').style.display = 'none';
-    showOverlay('End');
+    showOverlay('End', { fontSize: '32px', fontWeight: '900' }); // 高亮大字
     document.getElementById('unitDisplay').innerText = 'Idle'; // 新增：恢复Idle状态
     document.getElementById('unitDisplay').style.display = 'block'; // 显示Idle
     document.getElementById('lastSessionTitle').innerText = 'Last Session'; // 新增
@@ -212,7 +233,7 @@
 });
 
 function showCurrentSessionTable(start, units) {
-  const startStr = formatTime(start);
+  const startStr = formatTimeWithMonthDay(start);
   const html = `
     <table class="session-table current-session-table"><tbody>
       <tr><td class="session-key start-key">Start</td><td class="session-value">${startStr}</td></tr>

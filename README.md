@@ -1,4 +1,4 @@
-# Privacy Policy / 隐私政策
+# Privacy Policy
 
 **Billable Hour Machine** extension
 
